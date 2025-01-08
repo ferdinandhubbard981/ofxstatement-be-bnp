@@ -12,7 +12,7 @@ class bnpPlugin(Plugin):
     """
 
     def get_parser(self, filename):
-        f = open(filename, 'r',encoding=self.settings.get("charset", "ISO-8859-1"))
+        f = open(filename, 'r',encoding="utf-8")
         parser = bnpParser(f)
         parser.statement.bank_id = "Bnp"
         parser.statement.currency = "EUR"
@@ -25,11 +25,11 @@ class bnpParser(CsvStatementParser):
 
     mappings = {
         'id': 0,
-        'check_no': 0,
         'date': 1,
-        'payee': 5,
-        'memo': 6,
-        'amount': 3
+        'memo': 9,
+        'check_no': 0,
+        'payee': 8,
+        'amount': 3,
     }
 
     def parse(self):
@@ -57,8 +57,10 @@ class bnpParser(CsvStatementParser):
 
         # Raise an exception if we have statements for more than one account
         if (self.statement.account_id == None):
-            self.statement.account_id = line[7]
-        elif (self.statement.account_id != line[7]):
+            self.statement.account_id = line[5]
+        elif (self.statement.account_id != line[5]):
             raise ValueError("CSV file contains multiple accounts")
+
+        description = line[10]
 
         return stmtline
