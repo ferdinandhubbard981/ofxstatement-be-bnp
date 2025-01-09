@@ -12,7 +12,7 @@ class bnpPlugin(Plugin):
     """
 
     def get_parser(self, filename):
-        f = open(filename, 'r',encoding="utf-8")
+        f = open(filename, 'r', encoding="utf-8")
         parser = bnpParser(f)
         parser.statement.bank_id = "Bnp"
         parser.statement.currency = "EUR"
@@ -26,9 +26,7 @@ class bnpParser(CsvStatementParser):
     mappings = {
         'id': 0,
         'date': 1,
-        'memo': 9,
         'check_no': 0,
-        'payee': 8,
         'amount': 3,
     }
 
@@ -61,6 +59,15 @@ class bnpParser(CsvStatementParser):
         elif (self.statement.account_id != line[5]):
             raise ValueError("CSV file contains multiple accounts")
 
-        description = line[10]
+        payee = line[8]
+        if payee != "":
+            payee += " -- "
 
+        memo = payee + line[9]
+        stmtline.memo = memo
+
+        if memo != "":
+            memo = " -- " + memo
+        description = line[10] + memo
+        stmtline.payee = description  # gnucash treats payee as description
         return stmtline
